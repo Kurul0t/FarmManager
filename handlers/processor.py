@@ -41,8 +41,8 @@ async def report_():
 
     # 3. Дані беремо зі state.db_count_dict
     for row in state.db_count_dict:
-        count = f"{row["count"]}{row["mesur"]}"
-        ws.append([row["name"], row["code"], count])
+        count = f"{row['count']}{row['mesur']}"
+        ws.append([row['name'], row['code'], count])
 
     # Автоматичне визначення ширини стовпця "Назва" (A)
     max_length = 0

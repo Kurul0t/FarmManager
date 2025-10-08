@@ -301,7 +301,7 @@ async def handle_text(message: Message, bot: Bot):
             await bot.delete_message(chat_id=user_id, message_id=i)
         state.must_del[user_id].clear()
 
-        state.create_new_elem[user_id]["code"] = message.text
+        state.create_new_elem[user_id]['code'] = message.text
         rm = inline_butt.stop_add_elem
         text = (
             f"Назва: {state.create_new_elem[user_id]['name']}\n"f"Код: {message.text}\n\nВведіть к-ть товару або 0")
@@ -317,7 +317,7 @@ async def handle_text(message: Message, bot: Bot):
 
         if message.text.isdigit():
             rm = inline_butt.stop_add_elem
-            state.create_new_elem[user_id]["count"] = message.text
+            state.create_new_elem[user_id]['count'] = message.text
 
             text = (
                 f"Назва: {state.create_new_elem[user_id]['name']}\n"
