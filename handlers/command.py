@@ -304,7 +304,7 @@ async def handle_text(message: Message, bot: Bot):
         state.create_new_elem[user_id]["code"] = message.text
         rm = inline_butt.stop_add_elem
         text = (
-            f"Назва: {state.create_new_elem[user_id]["name"]}\n"f"Код: {message.text}\n\nВведіть к-ть товару або 0")
+            f"Назва: {state.create_new_elem[user_id]['name']}\n"f"Код: {message.text}\n\nВведіть к-ть товару або 0")
         msg = await bot.send_message(user_id, text, reply_markup=rm)
         state.must_del[user_id].append(msg.message_id)
         state.note_stat[user_id] = 10
