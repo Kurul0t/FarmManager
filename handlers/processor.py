@@ -6,7 +6,7 @@ import asyncio
 from openpyxl import Workbook
 
 # ------------------
-#шось написав
+# шось написав
 
 from data.state import data_of_start_incub
 from data import state
@@ -75,6 +75,15 @@ async def text_(index):
     return text
 
 
+async def something():
+    response = state.supabase.table(
+        "quails").select("adge, count").execute()
+    rows = response.data
+    over_30 = sum(row["count"] for row in rows if row["adge"] > 30)
+    under_30 = sum(row["count"] for row in rows if row["adge"] <= 30)
+    return over_30, under_30
+
+
 async def update_dcd():
     response = state.supabase.table(
         "accounting").select("*").execute()
@@ -99,7 +108,7 @@ async def create_remind_text(day, what_):
 
 async def check_periodically(bot: Bot):
     # users = os.environ.get("USERS_ID")
-    #user_id = 1030040998
+    # user_id = 1030040998
     while True:
         now = datetime.now(UA_TZ)
         saved_date = datetime.strptime(
@@ -129,17 +138,25 @@ async def check_periodically(bot: Bot):
 
         cur_text = ""
 
-        if now.hour == 12 and now.minute == 00:  # 12:00
-
+        if (now.hour == 12 and now.minute == 00):  # 12:00
+            over_30, under_30 = await something()
             text = ""
             for i, value in enumerate(state.db_count_dict):
                 if value['code'].startswith("К-5"):
-                    d = await formulаs(1, value['count'], 100, 0.2)
+                    if value['code'].startswith("К-51"):
+                        d = await formulаs(1, value['count'], under_30, 0.012)
+
+                    elif value['code'].startswith("К-52"):
+                        d = await formulаs(1, value['count'], over_30, 0.043)
+                    d = int(d)
 
                     if d <= 7:
                         if value["name"] not in state.no_remind_dict and value["name"] not in state.dict_remind:
                             state.dict_remind.append(value["name"])
-                            text += f'{value["name"]}: {d}дн.'
+                            text += f'{value["name"]}: {value['count']}кг -> {d}дн.\n'
+
+                        elif value["name"] not in state.no_remind_dict and value["name"] in state.dict_remind:
+                            text += f'{value["name"]}: {value['count']}кг -> {d}дн.\n'
 
             if text != "":
                 for user_id in state.users.values():
@@ -227,9 +244,23 @@ async def check_periodically(bot: Bot):
 
         elif now.hour == 00 and now.minute == 00:  # 00:00
             # має бути опівночі
+
+            # state.supabase.rpc("increment_all_adge").execute()
+
+            response = state.supabase.table(
+                "quails").select("adge, count").execute()
+            rows = response.data
+            over_30 = sum(row["count"] for row in rows if row["adge"] > 30)
+            under_30 = sum(row["count"] for row in rows if row["adge"] <= 30)
+
             for i, value in enumerate(state.db_count_dict):
                 if value['code'].startswith("К-5"):
-                    d = await formulаs(2, value['count'], 100, 0.2)
+                    if value['code'].startswith("К-51"):
+                        d = await formulаs(2, value['count'], under_30, 0.012)
+
+                    elif value['code'].startswith("К-52"):
+                        d = await formulаs(2, value['count'], over_30, 0.043)
+
                     state.supabase.table("accounting") \
                         .update({"count": d}) \
                         .eq("id", value["id"]) \
