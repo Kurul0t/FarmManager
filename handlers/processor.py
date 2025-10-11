@@ -153,10 +153,10 @@ async def check_periodically(bot: Bot):
                     if d <= 7:
                         if value["name"] not in state.no_remind_dict and value["name"] not in state.dict_remind:
                             state.dict_remind.append(value["name"])
-                            text += f'{value["name"]}: {value['count']}кг -> {d}дн.\n'
+                            text += f"{value['name']}: {value['count']}кг -> {d}дн.\n"
 
                         elif value["name"] not in state.no_remind_dict and value["name"] in state.dict_remind:
-                            text += f'{value["name"]}: {value['count']}кг -> {d}дн.\n'
+                            text += f"{value['name']}: {value['count']}кг -> {d}дн.\n"
 
             if text != "":
                 for user_id in state.users.values():
