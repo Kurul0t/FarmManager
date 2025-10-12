@@ -113,6 +113,8 @@ async def check_periodically(bot: Bot):
         now = datetime.now(UA_TZ)
         saved_date = datetime.strptime(
             data_of_start_incub["date"], "%d.%m.%Y")
+        
+        print("saved_date",saved_date)
         today_str = now.strftime("%d.%m.%Y")
 
         date_plus_2 = (saved_date + timedelta(days=2)
