@@ -113,8 +113,8 @@ async def check_periodically(bot: Bot):
         now = datetime.now(UA_TZ)
         saved_date = datetime.strptime(
             data_of_start_incub["date"], "%d.%m.%Y")
-        
-        print("saved_date",saved_date)
+
+        print("saved_date", saved_date)
         today_str = now.strftime("%d.%m.%Y")
 
         date_plus_2 = (saved_date + timedelta(days=2)
@@ -140,7 +140,7 @@ async def check_periodically(bot: Bot):
 
         cur_text = ""
 
-        if (now.hour == 13 and now.minute == 50):  # 12:00
+        if (now.hour == 14 and now.minute == 10):  # 12:00
             over_30, under_30 = await something()
             text = ""
             for i, value in enumerate(state.db_count_dict):
@@ -161,11 +161,11 @@ async def check_periodically(bot: Bot):
                             text += f"{value['name']}: {value['count']}кг -> {d}дн.\n"
 
             if text != "":
-                for user_id in state.users.values():
+                """for user_id in state.users.values():
                     if state.must_del[user_id]:
                         for i in state.must_del[user_id]:
                             await bot.delete_message(chat_id=user_id, message_id=i)
-                        state.must_del[user_id].clear()
+                        state.must_del[user_id].clear()"""
 
                 te = "УВАГА!\nЗакінчуються запаси корму:\n"
                 te += text
@@ -272,11 +272,11 @@ async def check_periodically(bot: Bot):
 
         if cur_text != "":
 
-            for user_id in state.users.values():
+            """for user_id in state.users.values():
                 if state.must_del[user_id]:
                     for i in state.must_del[user_id]:
                         await bot.delete_message(chat_id=user_id, message_id=i)
-                    state.must_del[user_id].clear()
+                    state.must_del[user_id].clear()"""
 
             for CHAT_ID in state.users.values():
 
