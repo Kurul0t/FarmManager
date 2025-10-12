@@ -140,7 +140,7 @@ async def check_periodically(bot: Bot):
 
         cur_text = ""
 
-        if (now.hour == 14 and now.minute == 40):  # 12:00
+        if (now.hour == 12 and now.minute == 00):  # 12:00
             over_30, under_30 = await something()
             text = ""
             for i, value in enumerate(state.db_count_dict):
