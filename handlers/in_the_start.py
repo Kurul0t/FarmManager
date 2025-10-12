@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 async def on_startup():
     print("Програма запущена. Виконання ініціалізації...")
 
-    users_str = os.getenv("AUTHORIZED_USERS")
+    """users_str = os.getenv("AUTHORIZED_USERS")
     if users_str:
         try:
             user_id_list = [int(uid.strip()) for uid in users_str.split(',')]
@@ -33,7 +33,7 @@ async def on_startup():
             print(
                 "Помилка: Одне або кілька значень у AUTHORIZED_USERS не є коректними числами.")
 
-            state.users = {}
+            state.users = {}"""
     print(state.users)
 
     await processor.update_dcd()

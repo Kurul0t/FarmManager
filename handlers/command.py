@@ -25,7 +25,7 @@ async def command_start_handler(message: Message, bot: Bot) -> None:
     # Надсилаємо фото через answer_photo
     # await message.answer_photo(photo=photo,reply_markup=butt)
     user_id = message.from_user.id
-    print(user_id)
+    print("user_id",user_id)
 
     markup = reply_butt.send_number_start
     keyboard = reply_butt.start

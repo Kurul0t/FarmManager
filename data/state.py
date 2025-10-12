@@ -47,9 +47,9 @@ worksheet_1 = sheet_2.get_worksheet(1)
 worksheet_2 = sheet_2.get_worksheet(0)
 
 
-# users = {1: 1030040998, 2: 1995558338}
-#users = {1: 1030040998}
-users={}
+users = {1: 1030040998, 2: 1995558338}
+# users = {1: 1030040998}
+# users={}
 
 
 # -----------------------------
