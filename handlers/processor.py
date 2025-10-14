@@ -30,6 +30,15 @@ async def formulаs(num_formula: int, count_feed, count_quail, avrg_con):
     return formul
 
 
+async def und_over():
+    response = state.supabase.table(
+        "quails").select("adge, count").execute()
+    rows = response.data
+    over_30 = sum(row["count"] for row in rows if row["adge"] > 30)
+    under_30 = sum(row["count"] for row in rows if row["adge"] <= 30)
+    return over_30, under_30
+
+
 async def report_():
     # 1. Створюємо новий Excel-файл
     wb = Workbook()
@@ -62,10 +71,17 @@ async def report_():
 
 async def text_(index):
     text = "ТАБЛИЦЯ ОБЛІКУ\n"
+
+    over_30, under_30 = await und_over()
+
     for i, value in enumerate(state.db_count_dict):
         if i == index:
             if value['code'].startswith("К-5"):
-                d = await formulаs(1, value['count'], 100, 0.2)
+                if value['code'].startswith("К-51"):
+                    d = await formulаs(1, value['count'], under_30, 0.012)
+
+                elif value['code'].startswith("К-52"):
+                    d = await formulаs(1, value['count'], over_30, 0.043)
                 days = f" -> {int(d)}дн."
             else:
                 days = ""
@@ -73,15 +89,6 @@ async def text_(index):
         else:
             text += f"      {value['name']}\n"
     return text
-
-
-async def something():
-    response = state.supabase.table(
-        "quails").select("adge, count").execute()
-    rows = response.data
-    over_30 = sum(row["count"] for row in rows if row["adge"] > 30)
-    under_30 = sum(row["count"] for row in rows if row["adge"] <= 30)
-    return over_30, under_30
 
 
 async def update_dcd():
@@ -141,7 +148,7 @@ async def check_periodically(bot: Bot):
         cur_text = ""
 
         if (now.hour == 12 and now.minute == 00):  # 12:00
-            over_30, under_30 = await something()
+            over_30, under_30 = await und_over()
             text = ""
             for i, value in enumerate(state.db_count_dict):
                 if value['code'].startswith("К-5"):
@@ -249,11 +256,8 @@ async def check_periodically(bot: Bot):
 
             # state.supabase.rpc("increment_all_adge").execute()
 
-            response = state.supabase.table(
-                "quails").select("adge, count").execute()
-            rows = response.data
-            over_30 = sum(row["count"] for row in rows if row["adge"] > 30)
-            under_30 = sum(row["count"] for row in rows if row["adge"] <= 30)
+
+            over_30, under_30 = await und_over()
 
             for i, value in enumerate(state.db_count_dict):
                 if value['code'].startswith("К-5"):
