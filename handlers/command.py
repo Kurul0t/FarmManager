@@ -25,7 +25,7 @@ async def command_start_handler(message: Message, bot: Bot) -> None:
     # Надсилаємо фото через answer_photo
     # await message.answer_photo(photo=photo,reply_markup=butt)
     user_id = message.from_user.id
-    print("user_id",user_id)
+    print("user_id", user_id)
 
     markup = reply_butt.send_number_start
     keyboard = reply_butt.start
@@ -266,6 +266,7 @@ async def handle_text(message: Message, bot: Bot):
             .update({"count": number}) \
             .eq("id", state.item_id_to_chen[user_id]) \
             .execute()
+
         await processor.update_dcd()
         # ---------------
         len_ = len(state.db_count_dict)

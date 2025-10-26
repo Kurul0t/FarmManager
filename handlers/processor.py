@@ -256,6 +256,18 @@ async def check_periodically(bot: Bot):
 
             # state.supabase.rpc("increment_all_adge").execute()
 
+            for user_id in state.users.values():
+
+                if state.must_del[user_id]:
+                    for i in state.must_del[user_id]:
+                        await bot.delete_message(chat_id=user_id, message_id=i)
+                    state.must_del[user_id].clear()
+
+                menu = inline_butt.farm_menu
+
+                msg = await bot.send_message(user_id, "Головне меню\n\nЩо би ви хотіли зробити?", reply_markup=menu)
+                # state.must_del = msg.message_id
+                state.must_del[user_id].append(msg.message_id)
 
             over_30, under_30 = await und_over()
 
