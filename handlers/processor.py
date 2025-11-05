@@ -254,36 +254,69 @@ async def check_periodically(bot: Bot):
         elif now.hour == 00 and now.minute == 00:  # 00:00
             # має бути опівночі
 
-            # state.supabase.rpc("increment_all_adge").execute()
+            state.supabase.rpc("increment_all_adge").execute()
             rows = state.worksheet_1.get_all_values()
 
             for row in rows[1:]:
+
                 col = row[10]
+
                 if col.isdigit():
+
                     count = int(col)
-                    if count > 0:
-                        print(row[4], row[8], row[10])
-                        date = row[4].strip()
-                        adge = int(row[8])
-                        date_iso = datetime.strptime(
-                            date, "%d.%m.%Y").date().isoformat()
+                    date = row[4].strip()
+                    date_iso = datetime.strptime(
+                        date, "%d.%m.%Y").date().isoformat()
+
+                    if count == 0:
+
                         result = state.supabase.table("quails").select(
                             "*").eq("were_born", date_iso).execute()
+
                         if len(result.data) == 0:
+
+                            continue
+
+                        else:
+
+                            existing = result.data[0]["count"]
+
+                            if existing != count:
+
+                                state.supabase.table("quails").delete().eq(
+                                    "were_born", date_iso).execute()
+                                print(
+                                    f"видалено рядок {date}: {existing}")
+
+                    elif count > 0:
+
+                        adge = int(row[8])
+                        print(row[4], row[8], row[10])
+                        result = state.supabase.table("quails").select(
+                            "*").eq("were_born", date_iso).execute()
+
+                        if len(result.data) == 0:
+
                             state.supabase.table("quails").insert({
                                 "were_born": date_iso,
                                 "count": count,
                                 "adge": adge  # якщо earnings = age, дивись що потрібно
                             }).execute()
                             print(f"[ADD] {date_iso} — count: {count}")
+
                         else:
+
                             existing = result.data[0]["count"]
+
                             if existing != count:
+
                                 state.supabase.table("quails").update(
-                                    {"count": count}).eq("date", date).execute()
+                                    {"count": count}).eq("were_born", date_iso).execute()
                                 print(
                                     f"Оновлено count для {date}: {existing} -> {count}")
+
                             else:
+
                                 print(f"Без змін: {date}")
 
             for user_id in state.users.values():
