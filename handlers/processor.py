@@ -1,6 +1,6 @@
 from aiogram import Bot
 import pytz
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import logging
 import asyncio
 from openpyxl import Workbook
@@ -17,6 +17,9 @@ UA_TZ = pytz.timezone("Europe/Kyiv")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+ddtt = date
 
 # num_formula: 1- к-ть днів корму при оновлені к-ті корму
 #              2- к-ть корму, оновлення вночі
@@ -113,6 +116,12 @@ async def create_remind_text(day, what_):
     return text
 
 
+def weekday_in_days_(n=3):
+
+    weekday_in_days = date.today().isoweekday()+3
+    return weekday_in_days % 7
+
+
 async def check_periodically(bot: Bot):
     # users = os.environ.get("USERS_ID")
     # user_id = 1030040998
@@ -147,7 +156,68 @@ async def check_periodically(bot: Bot):
 
         cur_text = ""
 
+  
+
         if (now.hour == 12 and now.minute == 00):  # 12:00
+
+            result = state.supabase.table("quails").select(
+                "adge, were_born, count").eq("type", 3).execute()
+
+            weekday_in_days = datetime.today().isoweekday()+3
+            weekday_in_days = weekday_in_days % 7
+
+            for row in result.data:
+                if row["adge"] + 3 == 60:
+
+
+                    days = weekday_in_days_()
+                    date = ddtt.today() + timedelta(days=3)
+
+                    
+
+                    if days <= 2:
+                        # пропонує зробити заруб на вихідних раніше
+
+                        adge = 60-1-days
+                        cur = 6 - ddtt.today().isoweekday()
+                        cur_date = ddtt.today() + timedelta(days=cur)
+
+                        text_2 = f"Система пропонує зробити заруб раніше:\n\nКоли: {cur_date} (СБ)\nПтахи досягнуть віку: {adge}дн"
+
+                    elif days == 6 or days == 7:
+
+                        cur_date = ddtt.today() + timedelta(days=3)
+
+                        text_2 = f"Заруб заплановано на {cur_date} (СБ)"
+
+                    else:
+                        # автоматично переноситься на наступні вихідні
+                        cur = 6-days
+                        adge = 60+cur
+                        cur_date = ddtt.today() + timedelta(days=cur)
+
+                        text_2 = f"Система пропонує зробити заруб пізніше:\n\nКоли: {cur_date} (СБ)\nПтахи досягнуть віку: {adge}дн"
+
+                    for CHAT_ID in state.users.values():
+
+                        msg = await bot.send_message(CHAT_ID, f"❗❗НАГАДУВАННЯ📢\nЗа три дні, у {state.weekdays_[weekday_in_days-1]} ({date}) перепели досягнуть віку 60 днів:\nДата вилупу: {row['were_born']}\nКількість: {row['count']}шт")
+
+                        m = await bot.send_message(CHAT_ID, text=text_2)
+
+                        state.must_del[CHAT_ID].append(msg.message_id)
+                        state.must_del[CHAT_ID].append(m.message_id)
+
+                elif row["adge"] + 1 == state.chenge_of_feed:
+
+                    for CHAT_ID in state.users.values():
+
+                        msg = await bot.send_message(CHAT_ID, f"Завтра перепели досягнуть віку {state.chenge_of_feed} днів:\nДата вилупу: {row['were_born']}\nКількість: {row['count']}шт\n\nЇх потрібно буде перевести на дорослий корм")
+
+                        m = await bot.send_message(CHAT_ID, text=text_2)
+
+                        state.must_del[CHAT_ID].append(msg.message_id)
+
+
             over_30, under_30 = await und_over()
             text = ""
             for i, value in enumerate(state.db_count_dict):
