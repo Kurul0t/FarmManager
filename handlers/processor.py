@@ -325,6 +325,7 @@ async def check_periodically(bot: Bot):
             # має бути опівночі
 
             state.supabase.rpc("increment_all_adge").execute()
+
             rows = state.worksheet_1.get_all_values()
 
             for row in rows[1:]:

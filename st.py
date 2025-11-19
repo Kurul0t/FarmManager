@@ -69,6 +69,12 @@ async def main() -> None:
 
     try:
         await in_the_start.on_startup()
+
+        for CHAT_ID in state.users.values():
+
+            m = await bot.send_message(CHAT_ID, "Роботу бота відновлено")
+            state.must_del[CHAT_ID].append(m.message_id)
+
         await dp.start_polling(bot)
     finally:
 
@@ -78,6 +84,13 @@ async def main() -> None:
 
         for user_id, num in state.user_phon_number.items():
             await bot.send_message(user_id, "Повідомляємо Вас, що бот тимчасово не працюватиме через оновлення системи.\n\nДля замовлення нашої продукції, ви можете зв'язатися з нашим оператором↘", reply_markup=rm)
+
+        for CHAT_ID in state.users.values():
+
+            for i in state.must_del[CHAT_ID]:
+                await bot.delete_message(chat_id=CHAT_ID, message_id=i)
+
+            await bot.send_message(CHAT_ID, "Бот тимчасово не працює\n\nПісля відновлення роботи, видаліть дане повідомлення самостійно")
 
         # state.conn.close()
 

@@ -25,16 +25,13 @@ async def add_date(callback: types.CallbackQuery, bot: Bot):
         date_p_17 = (today + timedelta(days=17)).strftime("%d.%m.%Y")
         le = len(rows)+1
         print("rows[-1]", le)
-        worksheet_1.append_row(
-            [None, None, today_str, None, f'=IF(C{le}="";"";C{le}+17)'],
-            value_input_option="USER_ENTERED")
 
         for i in state.must_del[user_id]:
             await bot.delete_message(chat_id=user_id, message_id=i)
         state.must_del[user_id].clear()
 
-        await callback.answer("✅Дата записана✅")
-        msg = await callback.message.answer("✅ Дата успішно додана в таблицю!")
+        await callback.answer("✅Активовано запуск✅")
+        msg = await callback.message.answer("⚙Процедура запуску інкубатора⚙")
 
         state.note_stat[user_id] = 1
 
@@ -66,16 +63,29 @@ async def send_note(user_id: int, message: types.Message, bot: Bot):
         await bot.delete_message(chat_id=user_id, message_id=i)
     state.must_del[user_id].clear()
 
+    today_str = datetime.now(UA_TZ).strftime("%d.%m.%Y")
+
+    le = len(rows)+1
+    worksheet_1.append_row([None, "Запуск", today_str, None, f'=IF(C{le}="";"";C{le}+17)'],
+                           value_input_option="USER_ENTERED")
+
+    rows = worksheet_1.get_all_values()
+
     if rows and rows[-1][0] == '*':
         msg = await bot.send_message(user_id, "⚙Виникли несправності⚙\nЗверніться до адміністратора")
         state.must_del[user_id].append(msg.message_id)
     else:
         czus = message.text
+
         last_row_index = len(rows)
+
         worksheet_1.update_cell(last_row_index, 6, czus)
-        today_str = datetime.now(UA_TZ).strftime("%d.%m.%Y")
+        worksheet_1.update_cell(last_row_index, 2, "Етап 1")
+
         state.data_of_start_incub["date"] = today_str
+
         today = datetime.strptime(today_str, "%d.%m.%Y")
+
         date_p_17 = (today + timedelta(days=17)).strftime("%d.%m.%Y")
 
         for CHAT_ID in state.users.values():
