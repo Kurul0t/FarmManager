@@ -127,8 +127,14 @@ async def check_periodically(bot: Bot):
     # user_id = 1030040998
     while True:
         now = datetime.now(UA_TZ)
-        saved_date = datetime.strptime(
-            data_of_start_incub["date"], "%d.%m.%Y")
+        date_str = state.data_of_start_incub.get("date")
+
+        if not date_str:
+            logger.warning("No start incub date yet")
+            await asyncio.sleep(60)
+            continue
+        
+        saved_date = datetime.strptime(date_str, "%d.%m.%Y")
 
         print("saved_date", saved_date)
         today_str = now.strftime("%d.%m.%Y")
