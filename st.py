@@ -42,8 +42,8 @@ async def main() -> None:
 
         for CHAT_ID in state.users.values():
 
-            m = await bot.send_message(CHAT_ID, "Роботу бота відновлено")
-            state.must_del[CHAT_ID].append(m.message_id)
+            await bot.send_message(CHAT_ID, "Роботу бота відновлено")
+
 
         await dp.start_polling(bot)
     finally:
@@ -57,8 +57,7 @@ async def main() -> None:
 
         for CHAT_ID in state.users.values():
 
-            for i in state.must_del[CHAT_ID]:
-                await bot.delete_message(chat_id=CHAT_ID, message_id=i)
+
 
             await bot.send_message(CHAT_ID, "Бот тимчасово не працює\n\nПісля відновлення роботи, видаліть дане повідомлення самостійно")
 
