@@ -18,7 +18,6 @@ async def handle_menu_callback(callback: CallbackQuery, callback_data: Accountin
 
     await callback.answer()
     user_id =callback.from_user.id
-    # state.must_del[user_id].clear()
 
     # print(state.db_count_dict)
     # -------------------
@@ -28,11 +27,9 @@ async def handle_menu_callback(callback: CallbackQuery, callback_data: Accountin
 
     rm = await accounting_butt.account_menu(callback_data.index, len_)
 
-    msg = await callback.message.edit_text(text, reply_markup=rm)
+    await callback.message.edit_text(text, reply_markup=rm)
     await callback.answer()
 
-    if msg.message_id not in state.must_del[user_id]:
-        state.must_del[user_id].append(msg.message_id)
 
 
 @router.callback_query(lambda c: c.data in ["serch", "back_to_main", "dlt_element", "stop_dlt", "update", "not_remind", "not_chen", "create_elem", "not_edd", "report"])
@@ -41,8 +38,7 @@ async def process_button(callback: types.CallbackQuery, bot: Bot):
     if callback.data == "serch":
 
         state.note_stat[user_id] = 5
-        msg = await bot.send_message(user_id, "Введіть код продукту або його повну назву")
-        state.must_del[user_id].append(msg.message_id)
+        await bot.send_message(user_id, "Введіть код продукту або його повну назву")
 
     elif callback.data == "back_to_main":
         menu = inline_butt.farm_menu
@@ -54,9 +50,7 @@ async def process_button(callback: types.CallbackQuery, bot: Bot):
         state.note_stat[user_id] = 0
 
     elif callback.data == "update":
-        for i in state.must_del[user_id]:
-            await bot.delete_message(chat_id=user_id, message_id=i)
-        state.must_del[user_id].clear()
+
 
         await processor.update_dcd()
 
@@ -64,10 +58,9 @@ async def process_button(callback: types.CallbackQuery, bot: Bot):
 
         text = await processor.text_(0)
         rm = await accounting_butt.account_menu(0, len_)
-        m = await bot.send_message(user_id, "Таблицю оновлено✅")
-        msg = await bot.send_message(user_id, text, reply_markup=rm)
-        state.must_del[user_id].append(msg.message_id)
-        state.must_del[user_id].append(m.message_id)
+        await bot.send_message(user_id, "Таблицю оновлено✅")
+        await bot.send_message(user_id, text, reply_markup=rm)
+
         await callback.answer()
     elif callback.data == "not_remind":
         state.no_remind_dict.extend(state.dict_remind)
@@ -88,17 +81,14 @@ async def process_button(callback: types.CallbackQuery, bot: Bot):
         await callback.answer()
     elif callback.data == "create_elem":
 
-        for i in state.must_del[user_id]:
-            await bot.delete_message(chat_id=user_id, message_id=i)
-        state.must_del[user_id].clear()
+
 
         state.note_stat[user_id] = 8
 
         rm = inline_butt.stop_add_elem
 
-        msg = await callback.message.answer("Введіть назву нового продукту", reply_markup=rm)
+        await callback.message.answer("Введіть назву нового продукту", reply_markup=rm)
 
-        state.must_del[user_id].append(msg.message_id)
 
     elif callback.data == "not_edd":
         state.note_stat[user_id] = 0
@@ -127,9 +117,7 @@ async def handle_menu_callback(callback: CallbackQuery, bot: Bot):
     user_id = callback.from_user.id
 
     if callback.data.startswith("dlt_element_"):
-        for i in state.must_del[user_id]:
-            await bot.delete_message(chat_id=user_id, message_id=i)
-        state.must_del[user_id].clear()
+
 
         item_id = int(callback.data.split("_")[2])
         print(item_id)
@@ -140,18 +128,15 @@ async def handle_menu_callback(callback: CallbackQuery, bot: Bot):
         name = response.data[0]["name"]
 
         rm = inline_butt.stop_dlt
-        msg = await bot.send_message(user_id, f"Ви впевнені, що хочете видалити елемент {name} з бази?\nДля підтвердження введіть 'так'", reply_markup=rm)
+        await bot.send_message(user_id, f"Ви впевнені, що хочете видалити елемент {name} з бази?\nДля підтвердження введіть 'так'", reply_markup=rm)
 
-        state.must_del[user_id].append(msg.message_id)
 
         state.item_id_to_del[user_id] = item_id
         state.note_stat[user_id] = 6
 
     elif callback.data.startswith("chen_elem_"):
 
-        for i in state.must_del[user_id]:
-            await bot.delete_message(chat_id=user_id, message_id=i)
-        state.must_del[user_id].clear()
+
 
         item_id = int(callback.data.split("_")[2])
         print(item_id)
@@ -162,7 +147,6 @@ async def handle_menu_callback(callback: CallbackQuery, bot: Bot):
         name = response.data[0]["name"]
 
         rm = inline_butt.stop_chen_elem
-        msg = await bot.send_message(user_id, f"{name}\n❗Увага❗ \nВи можете змінити лише кількість продукту\n\n(Ви можете ввести +число, -число або оновлене число)", reply_markup=rm)
-        state.must_del[user_id].append(msg.message_id)
+        await bot.send_message(user_id, f"{name}\n❗Увага❗ \nВи можете змінити лише кількість продукту\n\n(Ви можете ввести +число, -число або оновлене число)", reply_markup=rm)
         state.item_id_to_chen[user_id] = item_id
         state.note_stat[user_id] = 7
