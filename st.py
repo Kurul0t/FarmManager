@@ -2,52 +2,21 @@
 import asyncio
 import logging
 import os
-import json
-import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.client.bot import DefaultBotProperties
-# from dotenv import load_dotenv
+
 
 from keyboards import inline_butt
 from data import state
 from handlers import command, in_the_start, processor
 from callbacks import incub_call, account_call
 
-# load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-"""creds_path = os.environ.get("CREDS_PATH", "credentials.json")
 
-if not os.path.exists(creds_path):
-        raise ValueError(f"Файл credentials.json не знайдено")
-
-try:
-        with open(creds_path, "r") as f:
-            creds_dict = json.load(f)
-        logger.info("Файл credentials.json успішно зчитано")
-
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(
-            creds_dict, state.SCOPE)
-        logger.info("Облікові дані успішно створено")
-except Exception as e:
-        logger.error(
-            "Помилка при обробці credentials.json або створенні облікових даних: %s", e)
-        raise
-
-client = gspread.authorize(creds)
-
-    # Відкриття Google таблиціDA
-KEY_1 = os.environ.get("KEY_1")
-KEY_2 = os.environ.get("KEY_2")
-
-sheet_1 = client.open_by_key(KEY_1)
-sheet_2 = client.open_by_key(KEY_2)
-
-worksheet_1 = sheet_2.get_worksheet(1)
-worksheet_2 = sheet_2.get_worksheet(0)"""
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 if not BOT_TOKEN:
@@ -63,6 +32,7 @@ async def main() -> None:
 
     await bot.delete_webhook(drop_pending_updates=True)
     logger.info("запуск перевірки")
+
 
     # asyncio.create_task(start_task())
     asyncio.create_task(processor.check_periodically(bot))

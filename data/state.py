@@ -119,14 +119,6 @@ chus_quail = {}
 
 # ------------------------------------------------
 
-url = "https://kadgcljpwfdrfxnadwxt.supabase.co"
-key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthZGdjbGpwd2ZkcmZ4bmFkd3h0Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjUyOTQ1OSwiZXhwIjoyMDcyMTA1NDU5fQ.UzzxSR0k8_wDKktMkQ1QS2xakTa2ODLfzcug8GQ3ikI"
-
-
-supabase = create_client(url, key)
-
-db_count_dict = None  # таблиця кількості товару(облік)
-
 item_id_to_del = {}
 dict_remind = []
 no_remind_dict = []

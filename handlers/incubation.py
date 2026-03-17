@@ -26,19 +26,16 @@ async def add_date(callback: types.CallbackQuery, bot: Bot):
         le = len(rows)+1
         print("rows[-1]", le)
 
-        for i in state.must_del[user_id]:
-            await bot.delete_message(chat_id=user_id, message_id=i)
-        state.must_del[user_id].clear()
+
 
         await callback.answer("✅Активовано запуск✅")
         msg = await callback.message.answer("⚙Процедура запуску інкубатора⚙")
 
         state.note_stat[user_id] = 1
 
-        m = await callback.message.answer("Яку кількість яєць було закладено?\n(Напишіть лише число)")
+        await callback.message.answer("Яку кількість яєць було закладено?\n(Напишіть лише число)")
 
-        state.must_del[user_id].append(m.message_id)
-        state.must_del[user_id].append(msg.message_id)
+
 
     else:
         await callback.answer("❌Помилка❌")
@@ -46,22 +43,16 @@ async def add_date(callback: types.CallbackQuery, bot: Bot):
 
         menu = inline_butt.farm_menu
         if user_id in state.users.values():
-            m = await bot.send_message(user_id, "Головне меню\n\nЩо би ви хотіли зробити?", reply_markup=menu)
-            for i in state.must_del[user_id]:
-                await bot.delete_message(chat_id=user_id, message_id=i)
-            state.must_del[user_id].clear()
-            state.must_del[user_id].append(msg.message_id)
-            state.must_del[user_id].append(m.message_id)
+            await bot.send_message(user_id, "Головне меню\n\nЩо би ви хотіли зробити?", reply_markup=menu)
+
 
 
 async def send_note(user_id: int, message: types.Message, bot: Bot):
-    state.must_del[user_id].append(message.message_id)
+
 
     rows = worksheet_1.get_all_values()
 
-    for i in state.must_del[user_id]:
-        await bot.delete_message(chat_id=user_id, message_id=i)
-    state.must_del[user_id].clear()
+
 
     today_str = datetime.now(UA_TZ).strftime("%d.%m.%Y")
 
@@ -72,8 +63,8 @@ async def send_note(user_id: int, message: types.Message, bot: Bot):
     rows = worksheet_1.get_all_values()
 
     if rows and rows[-1][0] == '*':
-        msg = await bot.send_message(user_id, "⚙Виникли несправності⚙\nЗверніться до адміністратора")
-        state.must_del[user_id].append(msg.message_id)
+        await bot.send_message(user_id, "⚙Виникли несправності⚙\nЗверніться до адміністратора")
+
     else:
         czus = message.text
 
@@ -89,9 +80,9 @@ async def send_note(user_id: int, message: types.Message, bot: Bot):
         date_p_17 = (today + timedelta(days=17)).strftime("%d.%m.%Y")
 
         for CHAT_ID in state.users.values():
-            m = await bot.send_message(CHAT_ID, f"Відбувся запуск інкубатора\nК-ть закладених яєць: {czus}\nОрієнтовна дата вилупу: {date_p_17}")
+            await bot.send_message(CHAT_ID, f"Відбувся запуск інкубатора\nК-ть закладених яєць: {czus}\nОрієнтовна дата вилупу: {date_p_17}")
 
-            state.must_del[CHAT_ID].append(m.message_id)
+
 
 
 async def days_until_date(launch_date_str, target_date_str, date_format="%d.%m.%Y"):

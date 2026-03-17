@@ -36,10 +36,9 @@ async def on_startup():
             state.users = {}"""
     print(state.users)
 
-    await processor.update_dcd()
 
-    for user_id in state.users.values():
-        state.must_del[user_id] = []
+
+
 
     rows = worksheet_1.get_all_values()
     # user_id = callback.from_user.id

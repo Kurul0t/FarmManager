@@ -206,22 +206,21 @@ async def check_periodically(bot: Bot):
 
                     for CHAT_ID in state.users.values():
 
-                        msg = await bot.send_message(CHAT_ID, f"❗❗НАГАДУВАННЯ📢\nЗа три дні, у {state.weekdays_[weekday_in_days-1]} ({date}) перепели досягнуть віку 60 днів:\nДата вилупу: {row['were_born']}\nКількість: {row['count']}шт")
+                        await bot.send_message(CHAT_ID, f"❗❗НАГАДУВАННЯ📢\nЗа три дні, у {state.weekdays_[weekday_in_days-1]} ({date}) перепели досягнуть віку 60 днів:\nДата вилупу: {row['were_born']}\nКількість: {row['count']}шт")
 
-                        m = await bot.send_message(CHAT_ID, text=text_2)
+                        await bot.send_message(CHAT_ID, text=text_2)
 
-                        state.must_del[CHAT_ID].append(msg.message_id)
-                        state.must_del[CHAT_ID].append(m.message_id)
+
 
                 elif row["adge"] + 1 == state.chenge_of_feed:
 
                     for CHAT_ID in state.users.values():
 
-                        msg = await bot.send_message(CHAT_ID, f"Завтра перепели досягнуть віку {state.chenge_of_feed} днів:\nДата вилупу: {row['were_born']}\nКількість: {row['count']}шт\n\nЇх потрібно буде перевести на дорослий корм")
+                        await bot.send_message(CHAT_ID, f"Завтра перепели досягнуть віку {state.chenge_of_feed} днів:\nДата вилупу: {row['were_born']}\nКількість: {row['count']}шт\n\nЇх потрібно буде перевести на дорослий корм")
 
-                        m = await bot.send_message(CHAT_ID, text=text_2)
+                        await bot.send_message(CHAT_ID, text=text_2)
 
-                        state.must_del[CHAT_ID].append(msg.message_id)
+
 
 
             over_30, under_30 = await und_over()
@@ -244,11 +243,7 @@ async def check_periodically(bot: Bot):
                             text += f"{value['name']}: {value['count']}кг -> {d}дн.\n"
 
             if text != "":
-                """for user_id in state.users.values():
-                    if state.must_del[user_id]:
-                        for i in state.must_del[user_id]:
-                            await bot.delete_message(chat_id=user_id, message_id=i)
-                        state.must_del[user_id].clear()"""
+
 
                 te = "УВАГА!\nЗакінчуються запаси корму:\n"
                 te += text
@@ -256,9 +251,9 @@ async def check_periodically(bot: Bot):
 
                 for CHAT_ID in state.users.values():
 
-                    msg = await bot.send_message(CHAT_ID, te, reply_markup=rm)
+                    await bot.send_message(CHAT_ID, te, reply_markup=rm)
 
-                    state.must_del[CHAT_ID].append(msg.message_id)
+
 
             # ---------------------------------
 
@@ -398,16 +393,12 @@ async def check_periodically(bot: Bot):
 
             for user_id in state.users.values():
 
-                if state.must_del[user_id]:
-                    for i in state.must_del[user_id]:
-                        await bot.delete_message(chat_id=user_id, message_id=i)
-                    state.must_del[user_id].clear()
+
 
                 menu = inline_butt.farm_menu
 
                 msg = await bot.send_message(user_id, "Головне меню\n\nЩо би ви хотіли зробити?", reply_markup=menu)
-                # state.must_del = msg.message_id
-                state.must_del[user_id].append(msg.message_id)
+
 
             over_30, under_30 = await und_over()
 
@@ -428,16 +419,11 @@ async def check_periodically(bot: Bot):
 
         if cur_text != "":
 
-            """for user_id in state.users.values():
-                if state.must_del[user_id]:
-                    for i in state.must_del[user_id]:
-                        await bot.delete_message(chat_id=user_id, message_id=i)
-                    state.must_del[user_id].clear()"""
+
 
             for CHAT_ID in state.users.values():
 
-                msg = await bot.send_message(CHAT_ID, cur_text)
+                await bot.send_message(CHAT_ID, cur_text)
 
-                state.must_del[CHAT_ID].append(msg.message_id)
 
         await asyncio.sleep(60)

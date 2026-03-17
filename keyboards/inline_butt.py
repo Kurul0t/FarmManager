@@ -22,9 +22,7 @@ farm_menu = InlineKeyboardMarkup(
                               callback_data="check_date")],
         [InlineKeyboardButton(text="Інструкція інкубації",
                               callback_data="tabl_incub")],
-        [InlineKeyboardButton(text="Облік",
-                              callback_data=Accounting(
-                                  index=0).pack())]
+
     ]
 )
 

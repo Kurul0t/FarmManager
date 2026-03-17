@@ -50,12 +50,6 @@ async def command_start_handler(message: Message, bot: Bot) -> None:
         await bot.send_message(user_id, text='Вас вітає міні-ферма "Степова перепілка"\nЩоб почати користувася ботом, зареєструйтесь, будь ласка↘', reply_markup=markup)
 
 
-@router.message(Command(secret_command))
-async def hidden_command(message: Message):
-    user_id = message.from_user.id
-    if user_id in state.users.values():
-        await message.answer("Це прихована команда. Лише для обраних 😉")
-
 
 @router.message(F.contact)
 async def contact_handler(message: Message, bot: Bot):
@@ -64,15 +58,6 @@ async def contact_handler(message: Message, bot: Bot):
     name = message.from_user.full_name
     state.user_phon_number[user_id] = {}
     state.user_phon_number[user_id] = phone
-
-    with state.conn.cursor() as cur:
-
-        cur.execute("""
-                INSERT INTO users (name, user_id,phone)
-                VALUES (%s,%s, %s)
-                ON CONFLICT (user_id) DO NOTHING;
-            """, (name, user_id, phone))
-        state.conn.commit()
 
     rm = await main_menu_about.main_menu(user_id)
     # Надсилаємо фото через send_photo
@@ -94,14 +79,10 @@ async def reply_action(message: types.Message, bot: Bot):
 
     menu = inline_butt.farm_menu
     if user_id in state.users.values():
-        await message.delete()
-        if state.must_del[user_id]:
-            for i in state.must_del[user_id]:
-                await bot.delete_message(chat_id=user_id, message_id=i)
-            state.must_del[user_id].clear()
-        msg = await bot.send_message(user_id, "Головне меню\n\nЩо би ви хотіли зробити?", reply_markup=menu)
-        # state.must_del = msg.message_id
-        state.must_del[user_id].append(msg.message_id)
+
+
+        await bot.send_message(user_id, "Головне меню\n\nЩо би ви хотіли зробити?", reply_markup=menu)
+
 
 
 @router.message(lambda message: message.content_type == ContentType.TEXT)
@@ -117,29 +98,25 @@ async def handle_text(message: Message, bot: Bot):
         await send_note(user_id, message, bot)
         note_stat[user_id] = 0
     elif note_stat[user_id] == 2:
-        state.must_del[user_id].append(message.message_id)
+
         if message.text.lower() == "так":
             note_stat[user_id] = 3
 
-            for i in state.must_del[user_id]:
-                await bot.delete_message(chat_id=user_id, message_id=i)
-            state.must_del[user_id].clear()
+
             rm = inline_butt.stop_brk
-            msg = await bot.send_message(user_id, "Додай коментар, аби інші також знали причину, або введи символ ' - '", reply_markup=rm)
-            state.must_del[user_id].append(msg.message_id)
+            await bot.send_message(user_id, "Додай коментар, аби інші також знали причину, або введи символ ' - '", reply_markup=rm)
+
         else:
 
-            for i in state.must_del[user_id]:
-                await bot.delete_message(chat_id=user_id, message_id=i)
-            state.must_del[user_id].clear()
+
             rm = inline_butt.stop_brk
-            msg = await bot.send_message(user_id, "Некоректна відповідіть\n\nВведіть 'так' для підтвердження або скасуйте", reply_markup=rm)
-            state.must_del[user_id].append(msg.message_id)
+            await bot.send_message(user_id, "Некоректна відповідіть\n\nВведіть 'так' для підтвердження або скасуйте", reply_markup=rm)
+
             state.note_stat[user_id] = 2
 
     elif note_stat[user_id] == 3:
 
-        state.must_del[user_id].append(message.message_id)
+
 
         rows = worksheet_1.get_all_values()
         last_row_index = len(rows)
@@ -149,13 +126,11 @@ async def handle_text(message: Message, bot: Bot):
 
         comment = "відсутній" if message.text == "-" else message.text
 
-        for i in state.must_del[user_id]:
-            await bot.delete_message(chat_id=user_id, message_id=i)
-        state.must_del[user_id].clear()
+
 
         for CHAT_ID in state.users.values():
-            msg = await bot.send_message(CHAT_ID, f"‼Інкубацію було перервано‼\n\nКоментар: {comment}\nХто перервав: {message.from_user.first_name or ''}{message.from_user.last_name or ''}")
-            state.must_del[CHAT_ID].append(msg.message_id)
+            await bot.send_message(CHAT_ID, f"‼Інкубацію було перервано‼\n\nКоментар: {comment}\nХто перервав: {message.from_user.first_name or ''}{message.from_user.last_name or ''}")
+
 
         note_stat[user_id] = 0
     elif note_stat[user_id] == 4:
@@ -169,10 +144,7 @@ async def handle_text(message: Message, bot: Bot):
 
     elif note_stat[user_id] == 5:
         stat = 0
-        state.must_del[user_id].append(message.message_id)
-        for i in state.must_del:
-            await bot.delete_message(chat_id=user_id, message_id=i)
-        state.must_del[user_id].clear()
+
         for i, value in enumerate(state.db_count_dict):
             # print()
             if value["name"] == message.text or value["code"] == message.text:
@@ -180,24 +152,20 @@ async def handle_text(message: Message, bot: Bot):
                 text = await processor.text_(i)
                 len_ = len(state.db_count_dict)
                 rm = await accounting_butt.account_menu(i, len_)
-                m = await bot.send_message(user_id, text, reply_markup=rm)
-                state.must_del[user_id].append(m.message_id)
+                await bot.send_message(user_id, text, reply_markup=rm)
+
         if stat == 0:
             text = await processor.text_(0)
             len_ = len(state.db_count_dict)
             rm = await accounting_butt.account_menu(0, len_)
-            msg = await bot.send_message(user_id, f"Продукт {message.text} не було знайдено")
-            ms = await bot.send_message(user_id, text, reply_markup=rm)
+            await bot.send_message(user_id, f"Продукт {message.text} не було знайдено")
+            await bot.send_message(user_id, text, reply_markup=rm)
 
-            state.must_del[user_id].append(msg.message_id)
-            state.must_del[user_id].append(ms.message_id)
 
         state.note_stat[user_id] = 0
     elif note_stat[user_id] == 6:
-        await message.delete()
-        for i in state.must_del:
-            await bot.delete_message(chat_id=user_id, message_id=i)
-        state.must_del[user_id].clear()
+
+
         if message.text.lower() == "так":
             note_stat[user_id] = 0
 
@@ -213,15 +181,14 @@ async def handle_text(message: Message, bot: Bot):
             rm = await accounting_butt.account_menu(0, len_)
             # ---------------
             # await bot.send_message(user_id, "Елемент було видалено")
-            m = await message.answer("🗑 Елемент видалено 🗑")
+            await message.answer("🗑 Елемент видалено 🗑")
 
-            msg = await bot.send_message(user_id, text, reply_markup=rm)
-            state.must_del[user_id].append(msg.message_id)
-            state.must_del[user_id].append(m.message_id)
+            await bot.send_message(user_id, text, reply_markup=rm)
+
         else:
             rm = inline_butt.stop_dlt
-            msg = await message.answer("Некоректне введення\n\nВведіть 'так' або скасуйте видалення", reply_markup=rm)
-            state.must_del[user_id].append(msg.message_id)
+            await message.answer("Некоректне введення\n\nВведіть 'так' або скасуйте видалення", reply_markup=rm)
+
 
             state.note_stat[user_id] = 6
     elif note_stat[user_id] == 7:
@@ -279,10 +246,8 @@ async def handle_text(message: Message, bot: Bot):
 
         await bot.send_message(user_id, text, reply_markup=rm)
     elif note_stat[user_id] == 8:
-        await message.delete()
-        for i in state.must_del:
-            await bot.delete_message(chat_id=user_id, message_id=i)
-        state.must_del[user_id].clear()
+
+
 
         state.create_new_elem[user_id] = {
             "name": message.text,   # перший крок
@@ -292,29 +257,23 @@ async def handle_text(message: Message, bot: Bot):
         }
         rm = inline_butt.stop_add_elem
         text = f"Назва: {message.text}\n\nВведіть код продукту"
-        msg = await bot.send_message(user_id, text, reply_markup=rm)
-        state.must_del[user_id].append(msg.message_id)
+        await bot.send_message(user_id, text, reply_markup=rm)
         state.note_stat[user_id] = 9
 
     elif note_stat[user_id] == 9:
-        await message.delete()
-        for i in state.must_del:
-            await bot.delete_message(chat_id=user_id, message_id=i)
-        state.must_del[user_id].clear()
+
+
 
         state.create_new_elem[user_id]['code'] = message.text
         rm = inline_butt.stop_add_elem
         text = (
             f"Назва: {state.create_new_elem[user_id]['name']}\n"f"Код: {message.text}\n\nВведіть к-ть товару або 0")
-        msg = await bot.send_message(user_id, text, reply_markup=rm)
-        state.must_del[user_id].append(msg.message_id)
+        await bot.send_message(user_id, text, reply_markup=rm)
         state.note_stat[user_id] = 10
 
     elif note_stat[user_id] == 10:
-        await message.delete()
-        for i in state.must_del:
-            await bot.delete_message(chat_id=user_id, message_id=i)
-        state.must_del[user_id].clear()
+
+
 
         if message.text.isdigit():
             rm = inline_butt.stop_add_elem
@@ -326,19 +285,15 @@ async def handle_text(message: Message, bot: Bot):
                 f"К-ть: {float(message.text)}\n\n"
                 "Бажаєте додати? (так)"
             )
-            msg = await bot.send_message(user_id, text, reply_markup=rm)
-            state.must_del[user_id].append(msg.message_id)
+            await bot.send_message(user_id, text, reply_markup=rm)
             state.note_stat[user_id] = 11
 
         else:
             state.note_stat[user_id] = 10
-            msg = await message.answer("Некоректне введення к-ті\n\nВведіть ЧИСЛО або 0")
-            state.must_del[user_id].append(msg.message_id)
+            await message.answer("Некоректне введення к-ті\n\nВведіть ЧИСЛО або 0")
     elif note_stat[user_id] == 11:
         await message.delete()
-        for i in state.must_del:
-            await bot.delete_message(chat_id=user_id, message_id=i)
-        state.must_del[user_id].clear()
+
         if message.text.lower() == "так":
             # -----------------------
             state.supabase.table("accounting").insert({
@@ -359,14 +314,12 @@ async def handle_text(message: Message, bot: Bot):
 
             rm = await accounting_butt.account_menu(0, len_)
             # ---------------
-            msg = await bot.send_message(user_id, text, reply_markup=rm)
-            state.must_del[user_id].append(msg.message_id)
+            await bot.send_message(user_id, text, reply_markup=rm)
 
             state.note_stat[user_id] = 0
         else:
             rm = inline_butt.stop_add_elem
-            msg = await message.answer("Некоректне введення\n\nВведіть 'так' або скасуйте додавання", reply_markup=rm)
-            state.must_del[user_id].append(msg.message_id)
+            await message.answer("Некоректне введення\n\nВведіть 'так' або скасуйте додавання", reply_markup=rm)
 
             state.note_stat[user_id] = 11
 
