@@ -19,25 +19,8 @@ logger = logging.getLogger(__name__)
 async def on_startup():
     print("Програма запущена. Виконання ініціалізації...")
 
-    """users_str = os.getenv("AUTHORIZED_USERS")
-    if users_str:
-        try:
-            user_id_list = [int(uid.strip()) for uid in users_str.split(',')]
 
-            state.users = {
-                index + 1: user_id
-                for index, user_id in enumerate(user_id_list)
-            }
-            
-        except ValueError:
-            print(
-                "Помилка: Одне або кілька значень у AUTHORIZED_USERS не є коректними числами.")
-
-            state.users = {}"""
     print(state.users)
-
-
-
 
 
     rows = worksheet_1.get_all_values()
@@ -74,19 +57,6 @@ async def on_startup():
         state.photo3[i] = BufferedInputFile(
             file=image_data, filename=f"{i}21.jpg")
 
-    """image_path = os.path.join(IMAGE_FOLDER, f"no_cabinet_photo.jpg")
-    with open(image_path, 'rb') as image_file:
-        image_data = image_file.read()
-
-    # Використовуємо BufferedInputFile для байтових даних
-    state.no_cabinet_photo = BufferedInputFile(
-        file=image_data, filename=f"no_cabinet_photo.jpg")"""
-
-    """response = state.supabase.table("users").insert({
-        "user_id": 5842685,
-        "name": 'ijhsfdkj',
-        "phone": '0953342119'
-    }).execute()"""
 
     with open(f"images/incubation.jpg", 'rb') as image_file:
         image_data = image_file.read()
