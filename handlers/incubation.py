@@ -29,7 +29,7 @@ async def add_date(callback: types.CallbackQuery, bot: Bot):
 
 
         await callback.answer("✅Активовано запуск✅")
-        msg = await callback.message.answer("⚙Процедура запуску інкубатора⚙")
+        await callback.message.answer("⚙Процедура запуску інкубатора⚙")
 
         state.note_stat[user_id] = 1
 
@@ -39,7 +39,7 @@ async def add_date(callback: types.CallbackQuery, bot: Bot):
 
     else:
         await callback.answer("❌Помилка❌")
-        msg = await callback.message.answer("❌На жаль, немає вільних інкубаторів!")
+        await callback.message.answer("❌На жаль, немає вільних інкубаторів!")
 
         menu = inline_butt.farm_menu
         if user_id in state.users.values():
